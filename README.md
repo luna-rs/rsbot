@@ -12,36 +12,36 @@ Table of contents
 - [Exception Handling](#exception-handling)
 - [Providers](#providers)
 - [Task Management](#task-management)
+- [Releases] (#releases)
 
-### JBot & JBotGroup ###
+### JBot & JBotGroup
 -------
 stuff here
 
 
-### JBotReactor ###
+### JBotReactor
 -------
 stuff here
 
 
-### Exception Handling ###
+### Exception Handling
 -------
 stuff here
 
 
-### Providers ###
+### Providers
 -------
 stuff here
 
 
-### Task Management ###
+### Task Management
 -------
 stuff here
 
 
+### Releases
+-------
 
+The current stable version is <x.x.x>.
 
-
-
-
-
-
+<downloads of all previous .JARs with sources>
