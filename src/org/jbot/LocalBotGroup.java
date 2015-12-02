@@ -1,6 +1,6 @@
 package org.jbot;
 
-import org.jbot.net.LocalBotReactor;
+import org.jbot.net.JBotReactor;
 import org.jbot.net.codec.LoginEncoderProvider;
 import org.jbot.net.codec.MessageEncoderProvider;
 import org.jbot.net.codec.Rs317LoginEncoderProvider;
@@ -173,7 +173,7 @@ public final class LocalBotGroup implements Iterable<LocalBot> {
     /**
      * The NIO reactor that will handle all input/output events for {@link LocalBot}s.
      */
-    private final LocalBotReactor reactor = new LocalBotReactor(this);
+    private final JBotReactor reactor = new JBotReactor(this);
 
     /**
      * Creates a new {@link LocalBotGroup}.
@@ -316,7 +316,7 @@ public final class LocalBotGroup implements Iterable<LocalBot> {
     /**
      * @return The NIO reactor that will handle all input/output events for {@link LocalBot}s.
      */
-    public LocalBotReactor getReactor() {
+    public JBotReactor getReactor() {
         return reactor;
     }
 }

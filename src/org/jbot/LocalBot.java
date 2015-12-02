@@ -1,7 +1,7 @@
 package org.jbot;
 
-import org.jbot.net.ByteMessage;
-import org.jbot.net.LocalBotReactor;
+import org.jbot.net.JBotReactor;
+import org.jbot.net.codec.ByteMessage;
 import org.jbot.net.codec.MessageEncoderProvider;
 import org.jbot.util.JBotIsaac;
 import org.jbot.util.NioUtils;
@@ -79,7 +79,7 @@ public final class LocalBot {
         this.username = requireNonNull(username);
         this.password = requireNonNull(password);
 
-        LocalBotReactor reactor = botGroup.getReactor();
+        JBotReactor reactor = botGroup.getReactor();
 
         socket = NioUtils.openSocketChannel(botGroup);
         selectionKey = NioUtils.registerSocketChannel(botGroup, socket, reactor, SelectionKey.OP_READ);
