@@ -18,9 +18,8 @@ import static java.util.Objects.requireNonNull;
 /**
  * An {@link Iterable} implementation representing a group of {@link LocalBot}s. Typically, only one {@code LocalBotGroup}
  * instance is needed in a server although the user is free to create more. One should avoid creating too many instances
- * though in order to keep resource usage and complexity to a minimum. {@code LocalBotGroup} instances will go into an idle
- * state when certain functions are not used for a specific period of time in order to help the user keep resource usage
- * low.
+ * though in order to keep resource usage and complexity to a minimum. All I/O operations are done asynchronously and
+ * as a result only one thread is needed per {@code LocalBotGroup}.
  *
  * @author lare96 <http://github.org/lare96>
  */
