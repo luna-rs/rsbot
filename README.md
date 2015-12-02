@@ -7,14 +7,14 @@ jBot currently runs on Java 8, so users will need to be developing using Java 8 
 Table of contents
 -------
 
-- [JBot & JBotGroup](#jbot)
+- [LocalBot & LocalBotGroup](#localbot-&-localbotgroup)
 - [JBotReactor] (#jbotreactor)
 - [Exception Handling](#exception-handling)
 - [Providers](#providers)
 - [Task Management](#task-management)
 - [Releases] (#releases)
 
-### JBot & JBotGroup
+### LocalBot & LocalBotGroup
 -------
 stuff here
 
@@ -42,6 +42,6 @@ stuff here
 ### Releases
 -------
 
-The current stable version is <x.x.x>.
+The current stable version is (x.x.x).
 
-<downloads of all previous .JARs with sources>
+(downloads of all previous .JARs with sources)
