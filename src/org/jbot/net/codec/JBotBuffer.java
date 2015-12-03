@@ -12,7 +12,7 @@ import static com.google.common.base.Preconditions.checkArgument;
  *
  * @author lare96 <http://github.org/lare96>
  */
-public final class JBotMessage {
+public final class JBotBuffer {
 
     /**
      * An array of bit masks used for bitwise operations.
@@ -40,11 +40,11 @@ public final class JBotMessage {
     private int bitIndex = 0;
 
     /**
-     * Creates a new {@link JBotMessage} with the {@code buf} backing buffer.
+     * Creates a new {@link JBotBuffer} with the {@code buf} backing buffer.
      *
      * @param buf The backing buffer used to read and write data.
      */
-    private JBotMessage(ByteBuffer buf) {
+    private JBotBuffer(ByteBuffer buf) {
         this.buf = buf;
     }
 
@@ -58,34 +58,34 @@ public final class JBotMessage {
     }
 
     /**
-     * Creates a new {@link JBotMessage} with the {@code buf} backing buffer.
+     * Creates a new {@link JBotBuffer} with the {@code buf} backing buffer.
      *
      * @param buf The backing buffer used to read and write data.
      * @return The newly created buffer.
      */
-    public static JBotMessage create(ByteBuffer buf) {
-        return new JBotMessage(buf);
+    public static JBotBuffer create(ByteBuffer buf) {
+        return new JBotBuffer(buf);
     }
 
     /**
-     * Creates a new {@link JBotMessage} with the {@code cap} as the capacity. The returned buffer will most likely be a
+     * Creates a new {@link JBotBuffer} with the {@code cap} as the capacity. The returned buffer will most likely be a
      * direct buffer.
      *
      * @param cap The capacity of the buffer.
      * @return The newly created buffer.
      */
-    public static JBotMessage create(int cap) {
+    public static JBotBuffer create(int cap) {
         checkArgument(cap >= 0, "cap < 0");
-        return JBotMessage.create(ByteBuffer.allocate(cap));
+        return JBotBuffer.create(ByteBuffer.allocate(cap));
     }
 
     /**
-     * Creates a new {@link JBotMessage} with the default capacity. The returned buffer will most likely be a direct buffer.
+     * Creates a new {@link JBotBuffer} with the default capacity. The returned buffer will most likely be a direct buffer.
      *
      * @return The newly created buffer.
      */
-    public static JBotMessage create() {
-        return JBotMessage.create(DEFAULT_CAP);
+    public static JBotBuffer create() {
+        return JBotBuffer.create(DEFAULT_CAP);
     }
 
     /**
@@ -108,7 +108,7 @@ public final class JBotMessage {
      * @param opcode The opcode of the message.
      * @return An instance of this byte message.
      */
-    public JBotMessage message(int opcode) {
+    public JBotBuffer message(int opcode) {
         put(opcode);
         return this;
     }
@@ -120,7 +120,7 @@ public final class JBotMessage {
      * @param opcode The opcode of the message.
      * @return An instance of this byte message.
      */
-    public JBotMessage varMessage(int opcode) {
+    public JBotBuffer varMessage(int opcode) {
         message(opcode);
         varLengthIndex = buf.position();
         put(0);
@@ -134,7 +134,7 @@ public final class JBotMessage {
      * @param opcode The opcode of the message.
      * @return An instance of this byte message.
      */
-    public JBotMessage varShortMessage(int opcode) {
+    public JBotBuffer varShortMessage(int opcode) {
         message(opcode);
         varLengthIndex = buf.position();
         putShort(0);
@@ -147,7 +147,7 @@ public final class JBotMessage {
      *
      * @return An instance of this byte message.
      */
-    public JBotMessage endVarMessage() {
+    public JBotBuffer endVarMessage() {
         buf.put(varLengthIndex, (byte) (buf.position() - varLengthIndex - 1));
         return this;
     }
@@ -158,7 +158,7 @@ public final class JBotMessage {
      *
      * @return An instance of this byte message.
      */
-    public JBotMessage endVarShortMessage() {
+    public JBotBuffer endVarShortMessage() {
         buf.putShort(varLengthIndex, (short) (buf.position() - varLengthIndex - 2));
         return this;
     }
@@ -170,7 +170,7 @@ public final class JBotMessage {
      * @param from The argued buffer that bytes will be written from.
      * @return An instance of this byte message.
      */
-    public JBotMessage putBytes(ByteBuffer from) {
+    public JBotBuffer putBytes(ByteBuffer from) {
         for (int i = 0; i < from.position(); i++) {
             put(from.get(i));
         }
@@ -183,7 +183,7 @@ public final class JBotMessage {
      * @param from The argued buffer that bytes will be written from.
      * @return An instance of this byte message.
      */
-    public JBotMessage putBytes(byte[] from, int size) {
+    public JBotBuffer putBytes(byte[] from, int size) {
         buf.put(from, 0, size);
         return this;
     }
@@ -193,7 +193,7 @@ public final class JBotMessage {
      *
      * @param data The data to write to this buffer.
      */
-    public JBotMessage putBytesReverse(byte[] data) {
+    public JBotBuffer putBytesReverse(byte[] data) {
         for (int i = data.length - 1; i >= 0; i--) {
             put(data[i]);
         }
@@ -208,7 +208,7 @@ public final class JBotMessage {
      * @return An instance of this byte message.
      * @throws IllegalArgumentException If the number of bits is not between {@code 1} and {@code 32} inclusive.
      */
-    public JBotMessage putBits(int amount, int value) {
+    public JBotBuffer putBits(int amount, int value) {
         if (amount < 0 || amount > 32)
             throw new IllegalArgumentException("Number of bits must be between 1 and 32 inclusive.");
         int bytePos = bitIndex >> 3;
@@ -248,7 +248,7 @@ public final class JBotMessage {
      * @param flag The flag to write.
      * @return An instance of this byte message.
      */
-    public JBotMessage putBit(boolean flag) {
+    public JBotBuffer putBit(boolean flag) {
         putBits(1, flag ? 1 : 0);
         return this;
     }
@@ -260,7 +260,7 @@ public final class JBotMessage {
      * @param type The byte transformation type
      * @return An instance of this byte message.
      */
-    public JBotMessage put(int value, JBotByteType type) {
+    public JBotBuffer put(int value, JBotByteType type) {
         switch (type) {
         case A:
             value += 128;
@@ -284,7 +284,7 @@ public final class JBotMessage {
      * @param value The value to write.
      * @return An instance of this byte message.
      */
-    public JBotMessage put(int value) {
+    public JBotBuffer put(int value) {
         put(value, JBotByteType.NORMAL);
         return this;
     }
@@ -298,7 +298,7 @@ public final class JBotMessage {
      * @return An instance of this byte message.
      * @throws UnsupportedOperationException If middle or inverse-middle value types are selected.
      */
-    public JBotMessage putShort(int value, JBotByteType type, JBotEndianness order) {
+    public JBotBuffer putShort(int value, JBotByteType type, JBotEndianness order) {
         switch (order) {
         case BIG:
             put(value >> 8);
@@ -322,7 +322,7 @@ public final class JBotMessage {
      * @param value The value to write.
      * @return An instance of this byte message.
      */
-    public JBotMessage putShort(int value) {
+    public JBotBuffer putShort(int value) {
         putShort(value, JBotByteType.NORMAL, JBotEndianness.BIG);
         return this;
     }
@@ -334,7 +334,7 @@ public final class JBotMessage {
      * @param type The byte transformation type
      * @return An instance of this byte message.
      */
-    public JBotMessage putShort(int value, JBotByteType type) {
+    public JBotBuffer putShort(int value, JBotByteType type) {
         putShort(value, type, JBotEndianness.BIG);
         return this;
     }
@@ -346,7 +346,7 @@ public final class JBotMessage {
      * @param order The byte endianness type.
      * @return An instance of this byte message.
      */
-    public JBotMessage putShort(int value, JBotEndianness order) {
+    public JBotBuffer putShort(int value, JBotEndianness order) {
         putShort(value, JBotByteType.NORMAL, order);
         return this;
     }
@@ -359,7 +359,7 @@ public final class JBotMessage {
      * @param order The byte endianness type.
      * @return An instance of this byte message.
      */
-    public JBotMessage putInt(int value, JBotByteType type, JBotEndianness order) {
+    public JBotBuffer putInt(int value, JBotByteType type, JBotEndianness order) {
         switch (order) {
         case BIG:
             put(value >> 24);
@@ -395,7 +395,7 @@ public final class JBotMessage {
      * @param value The value to write.
      * @return An instance of this byte message.
      */
-    public JBotMessage putInt(int value) {
+    public JBotBuffer putInt(int value) {
         putInt(value, JBotByteType.NORMAL, JBotEndianness.BIG);
         return this;
     }
@@ -407,7 +407,7 @@ public final class JBotMessage {
      * @param type The byte transformation type
      * @return An instance of this byte message.
      */
-    public JBotMessage putInt(int value, JBotByteType type) {
+    public JBotBuffer putInt(int value, JBotByteType type) {
         putInt(value, type, JBotEndianness.BIG);
         return this;
     }
@@ -419,7 +419,7 @@ public final class JBotMessage {
      * @param order The byte endianness type.
      * @return An instance of this byte message.
      */
-    public JBotMessage putInt(int value, JBotEndianness order) {
+    public JBotBuffer putInt(int value, JBotEndianness order) {
         putInt(value, JBotByteType.NORMAL, order);
         return this;
     }
@@ -433,7 +433,7 @@ public final class JBotMessage {
      * @return An instance of this byte message.
      * @throws UnsupportedOperationException If middle or inverse-middle value types are selected.
      */
-    public JBotMessage putLong(long value, JBotByteType type, JBotEndianness order) {
+    public JBotBuffer putLong(long value, JBotByteType type, JBotEndianness order) {
         switch (order) {
         case BIG:
             put((int) (value >> 56));
@@ -469,7 +469,7 @@ public final class JBotMessage {
      * @param value The value to write.
      * @return An instance of this byte message.
      */
-    public JBotMessage putLong(long value) {
+    public JBotBuffer putLong(long value) {
         putLong(value, JBotByteType.NORMAL, JBotEndianness.BIG);
         return this;
     }
@@ -481,7 +481,7 @@ public final class JBotMessage {
      * @param type The byte transformation type
      * @return An instance of this byte message.
      */
-    public JBotMessage putLong(long value, JBotByteType type) {
+    public JBotBuffer putLong(long value, JBotByteType type) {
         putLong(value, type, JBotEndianness.BIG);
         return this;
     }
@@ -493,7 +493,7 @@ public final class JBotMessage {
      * @param order The byte endianness type. to write.
      * @return An instance of this byte message.
      */
-    public JBotMessage putLong(long value, JBotEndianness order) {
+    public JBotBuffer putLong(long value, JBotEndianness order) {
         putLong(value, JBotByteType.NORMAL, order);
         return this;
     }
@@ -504,7 +504,7 @@ public final class JBotMessage {
      * @param string The string to write.
      * @return An instance of this byte message.
      */
-    public JBotMessage putString(String string) {
+    public JBotBuffer putString(String string) {
         for (byte value : string.getBytes()) {
             put(value);
         }
