@@ -52,15 +52,21 @@ public final class JBotReactor implements Runnable {
 
     @Override
     public void run() {
-        while (!Thread.interrupted()) {
-            try {
-                doAsyncSelect();
-            } catch (Throwable t) {
-                botGroup.getExceptionHandler().onBotGroupException(botGroup, t);
+        try {
+            while (!Thread.interrupted()) {
+                try {
+                    doAsyncSelect();
+                } catch (Throwable t) {
+                    botGroup.getExceptionHandler().onBotGroupException(botGroup, t);
+                }
             }
+            Iterators.removeIf(botGroup.iterator(), it -> true);
+            reactorPool.execute(this);
+
+            throw new IllegalStateException("JBotIOThread was interrupted! Attempting to restart thread...");
+        } catch (Throwable t) {
+            botGroup.getExceptionHandler().onBotGroupException(botGroup, t);
         }
-        Iterators.removeIf(botGroup.iterator(), it -> true);
-        botGroup.getExceptionHandler().onException(new IllegalStateException("IO thread has been interrupted"));
     }
 
     /**
