@@ -1,10 +1,10 @@
 package org.jbot;
 
 import org.jbot.net.JBotReactor;
-import org.jbot.net.codec.LoginEncoderProvider;
-import org.jbot.net.codec.MessageEncoderProvider;
-import org.jbot.net.codec.Rs317LoginEncoderProvider;
-import org.jbot.net.codec.Rs317MessageEncoderProvider;
+import org.jbot.net.codec.game.MessageEncoderProvider;
+import org.jbot.net.codec.game.Rs317MessageEncoderProvider;
+import org.jbot.net.codec.login.LoginEncoderProvider;
+import org.jbot.net.codec.login.Rs317LoginEncoderProvider;
 import org.jbot.util.JBotExceptionHandler;
 import org.jbot.util.LoggerJBotExceptionHandler;
 import org.jbot.util.RsaKeyPair;
