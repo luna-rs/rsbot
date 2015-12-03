@@ -11,7 +11,6 @@ Table of contents
 - [IO] (#io)
 - [Exception Handling](#exception-handling)
 - [Providers](#providers)
-- [Messages](#messages)
 - [Task Management](#task-management)
 - [Releases] (#releases)
 
