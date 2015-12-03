@@ -1,8 +1,8 @@
 package org.jbot;
 
 import org.jbot.net.JBotReactor;
+import org.jbot.net.codec.JBotBuffer;
 import org.jbot.net.codec.JBotIsaac;
-import org.jbot.net.codec.JBotMessage;
 import org.jbot.net.codec.game.MessageEncoderProvider;
 import org.jbot.util.NioUtils;
 
@@ -119,7 +119,7 @@ public final class LocalBot {
      *
      * @param msg The message to write.
      */
-    public void write(JBotMessage msg) {
+    public void write(JBotBuffer msg) {
         checkState(socket.isOpen(), "socket closed");
 
         try {

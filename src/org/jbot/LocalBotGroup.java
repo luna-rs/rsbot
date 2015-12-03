@@ -1,13 +1,13 @@
 package org.jbot;
 
 import org.jbot.net.JBotReactor;
+import org.jbot.net.codec.JBotRsaKey;
 import org.jbot.net.codec.game.MessageEncoderProvider;
 import org.jbot.net.codec.game.Rs317MessageEncoderProvider;
 import org.jbot.net.codec.login.LoginEncoderProvider;
 import org.jbot.net.codec.login.Rs317LoginEncoderProvider;
 import org.jbot.util.JBotExceptionHandler;
 import org.jbot.util.LoggerJBotExceptionHandler;
-import org.jbot.util.RsaKeyPair;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -50,9 +50,9 @@ public final class LocalBotGroup implements Iterable<LocalBot> {
         private JBotExceptionHandler exceptionHandler = new LoggerJBotExceptionHandler();
 
         /**
-         * The RSA modulus and exponent values that will be used to login, {@code null} if there is no RSA key-pair.
+         * The RSA modulus and exponent values that will be used to login, {@code null} if there is no public RSA key.
          */
-        private RsaKeyPair rsaKeyPair;
+        private JBotRsaKey rsaKey;
 
         /**
          * A chaining method that sets the message encoder. {@code null} is not permitted.
@@ -79,10 +79,10 @@ public final class LocalBotGroup implements Iterable<LocalBot> {
         }
 
         /**
-         * A chaining method that sets the RSA key-pair.
+         * A chaining method that sets the public RSA key.
          */
-        public LocalBotGroupBuilder rsa(RsaKeyPair rsaKeyPair) {
-            this.rsaKeyPair = rsaKeyPair;
+        public LocalBotGroupBuilder rsaKey(JBotRsaKey rsaKey) {
+            this.rsaKey = rsaKey;
             return this;
         }
 
@@ -90,7 +90,7 @@ public final class LocalBotGroup implements Iterable<LocalBot> {
          * @return A new {@link LocalBotGroup} with the specified settings.
          */
         public LocalBotGroup build() {
-            return new LocalBotGroup(messageProvider, loginProvider, exceptionHandler, rsaKeyPair);
+            return new LocalBotGroup(messageProvider, loginProvider, exceptionHandler, rsaKey);
         }
     }
 
@@ -166,9 +166,9 @@ public final class LocalBotGroup implements Iterable<LocalBot> {
     private final JBotExceptionHandler exceptionHandler;
 
     /**
-     * The RSA modulus and exponent values that will be used to login, {@code null} if there is no RSA key-pair.
+     * The RSA modulus and exponent values that will be used to login, {@code null} if there is no public RSA key.
      */
-    private final RsaKeyPair rsaKeyPair;
+    private final JBotRsaKey rsaKey;
 
     /**
      * The NIO reactor that will handle all input/output events for {@link LocalBot}s.
@@ -181,14 +181,14 @@ public final class LocalBotGroup implements Iterable<LocalBot> {
      * @param messageProvider The message encoder implementation for {@link LocalBot}s in this {@code LocalBotGroup}.
      * @param loginProvider The login encoder implementation for {@link LocalBot}s in this {@code LocalBotGroup}.
      * @param exceptionHandler The exception handler implementation for {@link LocalBot}s in this {@code LocalBotGroup}.
-     * @param rsaKeyPair The RSA modulus and exponent values that will be used to login, {@code null} if there is no RSA
-     * key-pair.
+     * @param rsaKey The RSA modulus and exponent values that will be used to login, {@code null} if there is no public RSA
+     * key.
      */
-    public LocalBotGroup(MessageEncoderProvider messageProvider, LoginEncoderProvider loginProvider, JBotExceptionHandler exceptionHandler, RsaKeyPair rsaKeyPair) {
+    public LocalBotGroup(MessageEncoderProvider messageProvider, LoginEncoderProvider loginProvider, JBotExceptionHandler exceptionHandler, JBotRsaKey rsaKey) {
         this.messageProvider = messageProvider;
         this.loginProvider = loginProvider;
         this.exceptionHandler = exceptionHandler;
-        this.rsaKeyPair = rsaKeyPair;
+        this.rsaKey = rsaKey;
     }
 
     @Override
@@ -307,10 +307,10 @@ public final class LocalBotGroup implements Iterable<LocalBot> {
     }
 
     /**
-     * @return The RSA modulus and exponent values that will be used to login, {@code null} if there is no RSA key-pair.
+     * @return The RSA modulus and exponent values that will be used to login, {@code null} if there is no public RSA key.
      */
-    public RsaKeyPair getRsaKeyPair() {
-        return rsaKeyPair;
+    public JBotRsaKey getRsaKey() {
+        return rsaKey;
     }
 
     /**

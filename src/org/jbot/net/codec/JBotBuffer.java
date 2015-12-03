@@ -1,7 +1,5 @@
 package org.jbot.net.codec;
 
-import org.jbot.util.RsaKeyPair;
-
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
@@ -919,16 +917,16 @@ public final class JBotBuffer {
     /**
      * Encodes RSA into this {@code ByteMessage}.
      *
-     * @param rsaKeyPair The RSA key-pair.
+     * @param rsaKey The public RSA key.
      */
-    public void encodeRSA(RsaKeyPair rsaKeyPair) {
+    public void encodeRSA(JBotRsaKey rsaKey) {
         int length = buf.position();
         buf.position(0);
 
         byte rsa[] = getBytes(length);
 
-        if (rsaKeyPair != null) {
-            rsa = new BigInteger(buf.array()).modPow(rsaKeyPair.getExponent(), rsaKeyPair.getModulus()).toByteArray();
+        if (rsaKey != null) {
+            rsa = new BigInteger(buf.array()).modPow(rsaKey.getExponent(), rsaKey.getModulus()).toByteArray();
         }
 
         buf.position(0);
