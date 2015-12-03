@@ -12,7 +12,7 @@ import java.nio.ByteBuffer;
  *
  * @author lare96 <http://github.org/lare96>
  */
-public final class Rs317MessageEncoderProvider implements MessageEncoderProvider {
+public class Rs317MessageEncoderProvider implements MessageEncoderProvider {
 
     @Override
     public void encode(LocalBot localBot, JBotMessage toEncode) {
