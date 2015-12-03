@@ -7,7 +7,7 @@ import org.jbot.net.codec.game.Rs317MessageEncoderProvider;
 import org.jbot.net.codec.login.LoginEncoderProvider;
 import org.jbot.net.codec.login.Rs317LoginEncoderProvider;
 import org.jbot.util.JBotExceptionHandler;
-import org.jbot.util.LoggerJBotExceptionHandler;
+import org.jbot.util.JBotLoggerExceptionHandler;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -47,7 +47,7 @@ public final class LocalBotGroup implements Iterable<LocalBot> {
         /**
          * The exception handler implementation for {@link LocalBot}s in this {@code LocalBotGroup}.
          */
-        private JBotExceptionHandler exceptionHandler = new LoggerJBotExceptionHandler();
+        private JBotExceptionHandler exceptionHandler = new JBotLoggerExceptionHandler();
 
         /**
          * The RSA modulus and exponent values that will be used to login, {@code null} if there is no public RSA key.

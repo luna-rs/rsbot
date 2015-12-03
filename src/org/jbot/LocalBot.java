@@ -4,6 +4,7 @@ import org.jbot.net.JBotReactor;
 import org.jbot.net.codec.JBotBuffer;
 import org.jbot.net.codec.JBotIsaac;
 import org.jbot.net.codec.game.MessageEncoderProvider;
+import org.jbot.net.msg.JBotMessageWriter;
 import org.jbot.util.NioUtils;
 
 import java.io.IOException;
@@ -119,12 +120,30 @@ public final class LocalBot {
      *
      * @param msg The message to write.
      */
-    public void write(JBotBuffer msg) {
-        checkState(socket.isOpen(), "socket closed");
+    public void write(JBotMessageWriter msg) {
+        botGroup.getMessageProvider().encode(this, msg.toJBotMessage(this));
+    }
 
+
+    /**
+     * Writes a {@code msg} to this backing {@link SocketChannel}.
+     *
+     * @param msg The message to write.
+     */
+    public void write(JBotBuffer msg) {
+        write(msg.getBuffer());
+    }
+
+    /**
+     * Writes a {@code msg} to this backing {@link SocketChannel}.
+     *
+     * @param msg The message to write.
+     */
+    public void write(ByteBuffer msg) {
+        checkState(socket.isOpen(), "socket closed");
         try {
-            msg.getBuffer().flip();
-            socket.write(msg.getBuffer());
+            msg.flip();
+            socket.write(msg);
         } catch (IOException e) {
             botGroup.getExceptionHandler().onBotException(this, e);
         }
