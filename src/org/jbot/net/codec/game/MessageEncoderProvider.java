@@ -15,6 +15,7 @@ public interface MessageEncoderProvider {
      *
      * @param localBot The {@link LocalBot} this message is being encoded for.
      * @param toEncode The {@link JBotMessage} that will be encoded.
+     * @throws Exception If any errors occur while encoding.
      */
-    public void encode(LocalBot localBot, JBotMessage toEncode);
+    public void encode(LocalBot localBot, JBotMessage toEncode) throws Exception;
 }

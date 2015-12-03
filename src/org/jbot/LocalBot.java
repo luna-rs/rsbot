@@ -4,6 +4,7 @@ import org.jbot.net.JBotReactor;
 import org.jbot.net.codec.JBotBuffer;
 import org.jbot.net.codec.JBotIsaac;
 import org.jbot.net.codec.game.MessageEncoderProvider;
+import org.jbot.net.msg.JBotMessage;
 import org.jbot.net.msg.JBotMessageWriter;
 import org.jbot.util.NioUtils;
 
@@ -121,9 +122,13 @@ public final class LocalBot {
      * @param msg The message to write.
      */
     public void write(JBotMessageWriter msg) {
-        botGroup.getMessageProvider().encode(this, msg.toJBotMessage(this));
+        try {
+            JBotMessage outgoing = msg.toJBotMessage(this);
+            botGroup.getMessageProvider().encode(this, outgoing);
+        } catch (Exception e) {
+            botGroup.getExceptionHandler().onBotException(this, e);
+        }
     }
-
 
     /**
      * Writes a {@code msg} to this backing {@link SocketChannel}.
