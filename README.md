@@ -44,6 +44,7 @@ LocalBot myBot = mainGroup.add("myusername", "mypassword");
 -------
 All IO for bots is done using asynchronous NIO. In other words, all IO functions will return instantly instead of blocking until completion. All IO events are handled by the ```JBotReactor```. If for some reason the reactor's thread is interrupted, it will throw an ```IllegalStateException```, log out all bots, and then attempt to restart itself. If it cannot restart itself, the ```LocalBotGroup``` holding this ```JBotReactor``` loses all of its functionality.
 
+
 Outgoing messages are controlled by the ```JBotMessageWriter```. If a custom message not already supplied needs to be written then users should extend that class. Outgoing messages are sent like so
 
 ```
