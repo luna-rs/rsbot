@@ -43,9 +43,13 @@ public class Rs317LoginEncoderProvider implements LoginEncoderProvider {
         JBotBuffer initRequest = JBotBuffer.create();
 
         initRequest.put(14);
-        initRequest.put((int) (StringUtils.encodeBase37(localBot.getUsername()) >> 16 & 31L));
+
+        long longName = StringUtils.encodeBase37(localBot.getUsername());
+        initRequest.put((int) (longName >> 16 & 31L));
 
         localBot.write(initRequest);
+
+        localBot.getState().set(LocalBotState.INITIAL_LOGIN_RESPONSE);
     }
 
     /**
@@ -57,48 +61,51 @@ public class Rs317LoginEncoderProvider implements LoginEncoderProvider {
     protected void initialLoginResponse(LocalBot localBot) {
         ByteBuffer readBuf = localBot.getReadBuf();
 
-        if (readBuf.remaining() < 17) {
-            readBuf.compact();
-            return;
+        if (readBuf.remaining() >= 17) {
+            readBuf.getLong();
+
+            int opcode = readBuf.get();
+            checkState(opcode == 0, "invalid response opcode: " + opcode);
+
+            JBotBuffer secureBlock = JBotBuffer.create();
+            long serverSeed = readBuf.getLong();
+
+            int[] seed = new int[4];
+            seed[0] = (int) (Math.random() * 99999999D);
+            seed[1] = (int) (Math.random() * 99999999D);
+            seed[2] = (int) (serverSeed >> 32);
+            seed[3] = (int) serverSeed;
+
+            secureBlock.put(10);
+            secureBlock.putInt(seed[0]);
+            secureBlock.putInt(seed[1]);
+            secureBlock.putInt(seed[2]);
+            secureBlock.putInt(seed[3]);
+            secureBlock.putInt(455437);
+            secureBlock.putString(localBot.getUsername());
+            secureBlock.putString(localBot.getPassword());
+            secureBlock.encodeRSA(localBot.getBotGroup().getRsaKey());
+
+            JBotBuffer clientInfo = JBotBuffer.create();
+            clientInfo.put(16);
+            clientInfo.put(secureBlock.getBuffer().position() + 40);
+            clientInfo.put(255);
+            clientInfo.putShort(317);
+            clientInfo.put(0);
+            for (int i = 0; i < 9; i++) {
+                clientInfo.putInt(ThreadLocalRandom.current().nextInt());
+            }
+            clientInfo.putBytes(secureBlock.getBuffer());
+
+            localBot.setEncryptor(new JBotIsaac(seed));
+            for (int i = 0; i < 4; i++) {
+                seed[i] += 50;
+            }
+            // TODO: Set decryptor for message decoding
+            localBot.write(clientInfo);
+
+            localBot.getState().set(LocalBotState.FINAL_LOGIN_RESPONSE);
         }
-        readBuf.getLong();
-
-        int opcode = readBuf.get();
-        checkState(opcode == 0, "invalid response opcode: " + opcode);
-
-        JBotBuffer secureBlock = JBotBuffer.create();
-        int[] seed = { ThreadLocalRandom.current().nextInt(), ThreadLocalRandom.current().nextInt(), readBuf.getInt(),
-            readBuf.getInt() };
-        secureBlock.put(10);
-        for (int val : seed) {
-            secureBlock.putInt(val);
-        }
-        secureBlock.putInt(455437);
-        secureBlock.putString(localBot.getUsername());
-        secureBlock.putString(localBot.getPassword());
-
-        JBotBuffer clientInfo = JBotBuffer.create();
-        clientInfo.put(16);
-        clientInfo.put(secureBlock.getBuffer().position() + 40);
-        clientInfo.put(1);
-        clientInfo.put(317);
-        clientInfo.put(0);
-
-        secureBlock.encodeRSA(localBot.getBotGroup().getRsaKey());
-
-        for (int i = 0; i < 9; i++) {
-            clientInfo.putInt(ThreadLocalRandom.current().nextInt());
-        }
-        clientInfo.put(secureBlock.getBuffer().position() - 1);
-        clientInfo.putBytes(secureBlock.getBuffer());
-
-        localBot.setEncryptor(new JBotIsaac(seed));
-        for (int i = 0; i < 4; i++) {
-            seed[i] += 50;
-        }
-        // TODO: Set decryptor for message decoding
-
-        localBot.write(clientInfo);
     }
 
     /**
@@ -109,12 +116,14 @@ public class Rs317LoginEncoderProvider implements LoginEncoderProvider {
     protected void finalLoginResponse(LocalBot localBot) {
         ByteBuffer readBuf = localBot.getReadBuf();
 
-        if (readBuf.remaining() < 1) {
-            readBuf.compact();
-            return;
+        if (readBuf.remaining() >= 3) {
+            int opcode = readBuf.get();
+
+            checkState(opcode == 2, "invalid final response code: " + opcode);
+
+            readBuf.getShort();
+
+            localBot.getState().set(LocalBotState.LOGGED_IN);
         }
-        int opcode = readBuf.get();
-        checkState(opcode == 2, "invalid final response code: " + opcode);
-        localBot.getState().set(LocalBotState.LOGGED_IN);
     }
 }
