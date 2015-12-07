@@ -52,7 +52,7 @@ Outgoing messages are controlled by the ```JBotMessageWriter```. If a custom mes
 LocalBot myBot = ...;
 
 myBot.write(new Write317TalkMessage("I'm talking!"));
-myBot.write(new Write317CommandMessage("yell I'm yelling!"));
+myBot.write(new Write317ButtonMessage(4553));
 
 myBot.write(new WriteMyCustomMessage(arg1, arg2, "my own impl of JBotMessageWriter!"));
 ```
