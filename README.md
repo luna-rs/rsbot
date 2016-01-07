@@ -21,7 +21,7 @@ The two main classes that the user will be utilizing are ```JBot``` and ```JBotG
 </br>
 A new bot and bot group with default settings should be started like so
 
-```
+```java
 JBotGroup mainGroup = new JBotGroupBuilder().build();
 
 ...
@@ -31,7 +31,7 @@ JBot myBot = mainGroup.add("myusername", "mypassword");
 
 Alternatively, one may need to configure a bot and bot group with personalized settings
 
-```
+```java
 JBotGroup mainGroup = new JBotGroupBuilder().exceptionHandler(new MyCustomExceptionHandler())
 .rsaKey(new JBotRsaKey(...)).build();
 
@@ -48,7 +48,7 @@ All IO for bots is done using asynchronous NIO. In other words, all IO functions
 </br>
 Outgoing messages are controlled by the ```JBotMessageWriter```. If a custom message not already supplied needs to be written then users should extend that class. Outgoing messages are sent like so
 
-```
+```java
 JBot myBot = ...;
 
 myBot.write(new Write317TalkMessage("I'm talking!"));
