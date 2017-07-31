@@ -7,6 +7,7 @@ import io.rsbot.net.codec.login.LoginEncoder;
 import io.rsbot.net.msg.RsBotMessage;
 
 import java.io.IOException;
+import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -67,8 +68,10 @@ public final class NioEventLoop extends Thread {
                     iterator.remove();
                 }
             }
+        } catch (ClosedSelectorException e) {
+            LOGGER.info("The event loop for Runescape bots has shut down.");
         } catch (Exception e) {
-            LOGGER.severe("The event loop for Runescape bots has shut down.");
+            LOGGER.severe("The event loop thread has encountered an error.");
             e.printStackTrace();
         } finally {
             logoutAll();
@@ -98,7 +101,7 @@ public final class NioEventLoop extends Thread {
 
         SocketChannel channel = (SocketChannel) key.channel();
         if (channel.finishConnect()) {
-
+            rsChannel.setState(RsBotState.LOGGING_IN);
             LoginEncoder loginEncoder = group.getLoginEncoder();
             loginEncoder.encode(rsChannel);
 
@@ -115,7 +118,7 @@ public final class NioEventLoop extends Thread {
         msgDecoder.decode((RsBotChannel) key.attachment(), msgList);
 
         Iterator<Object> it = msgList.mutableIterator();
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             Object msg = it.next();
             msgDecoder.handleMessage(msg);
             it.remove();

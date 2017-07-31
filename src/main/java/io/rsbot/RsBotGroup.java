@@ -238,6 +238,14 @@ public final class RsBotGroup implements Iterable<RsBot> {
     }
 
     /**
+     * Terminates this group and kills the event loop thread.
+     */
+    public void terminate() throws IOException {
+        eventLoop.interrupt();
+        eventLoop.getSelector().close();
+    }
+
+    /**
      * @return The connection address.
      */
     public InetSocketAddress getConnectAddress() {

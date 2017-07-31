@@ -14,6 +14,7 @@ import java.nio.channels.SocketChannel;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static io.rsbot.net.RsBotState.*;
 
@@ -52,7 +53,7 @@ public final class RsBotChannel {
     /**
      * The current connection state.
      */
-    private RsBotState state = CONNECTING;
+    private final AtomicReference<RsBotState> state = new AtomicReference<>(REGISTERED);
 
     /**
      * The ISAAC encryption and decryption pairs.
@@ -125,7 +126,7 @@ public final class RsBotChannel {
      * Writes a Runescape message.
      */
     private void writeMsg(RsBotMessage msg) throws IOException {
-        if (state == LOGGED_IN && key.isPresent()) {
+        if (state.get() == LOGGED_IN && key.isPresent()) {
             /* Runescape messages are buffered. */
             encodeQueue.add(msg);
             key.get().interestOps(SelectionKey.OP_WRITE);
@@ -139,7 +140,7 @@ public final class RsBotChannel {
         if (channel.isOpen()) {
             channel.close();
             key.ifPresent(SelectionKey::cancel);
-            state = LOGGED_OUT;
+            state.set(LOGGED_OUT);
             bot.getGroup().get(bot.getUsername());
         }
     }
@@ -149,6 +150,20 @@ public final class RsBotChannel {
      */
     public boolean isActive() {
         return channel.isOpen();
+    }
+
+    /**
+     * Sets the networking state.
+     */
+    public void setState(RsBotState newState){
+        state.set(newState);
+    }
+
+    /**
+     * Returns the networking state.
+     */
+    public RsBotState getState() {
+        return state.get();
     }
 
     /**
