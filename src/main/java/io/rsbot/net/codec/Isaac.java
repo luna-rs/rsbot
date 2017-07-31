@@ -21,17 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jbot.net.codec;
+package io.rsbot.net.codec;
 
 /**
  * <p> An implementation of an ISAAC cipher. See <a href="http://en.wikipedia.org/wiki/ISAAC_(cipher)">
- * http://en.wikipedia.org/wiki/ISAAC_(cipher)</a> for more information. </p> <p> <p> This implementation is based on the one
- * written by Bob Jenkins, which is available at <a href="http://www.burtleburtle.net/bob/java/rand/Rand.java">
- * http://www.burtleburtle.net/bob/java/rand/Rand.java</a>. </p>
+ * http://en.wikipedia.org/wiki/ISAAC_(cipher)</a> for more information. </p> <p> <p>
+ *
+ * This implementation is based on the one written by Bob Jenkins, which is available at
+ * <a href="http://www.burtleburtle.net/bob/java/rand/Rand.java">
+ *     http://www.burtleburtle.net/bob/java/rand/Rand.java</a>. </p>
  *
  * @author Graham Edgecombe
  */
-public final class JBotIsaac {
+public final class Isaac {
 
     /**
      * The golden ratio.
@@ -88,10 +90,8 @@ public final class JBotIsaac {
      *
      * @param seed The seed.
      */
-    public JBotIsaac(int[] seed) {
-        for (int i = 0; i < seed.length; i++) {
-            results[i] = seed[i];
-        }
+    public Isaac(int[] seed) {
+        System.arraycopy(seed, 0, results, 0, seed.length);
         init(true);
     }
 
