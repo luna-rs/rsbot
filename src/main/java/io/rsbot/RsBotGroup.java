@@ -2,7 +2,7 @@ package io.rsbot;
 
 import io.rsbot.net.NioEventLoop;
 import io.rsbot.net.RsBotChannel;
-import io.rsbot.net.RsBotLoginFuture;
+import io.rsbot.net.LoginPromise;
 import io.rsbot.net.codec.RsaKeyPair;
 import io.rsbot.net.codec.game.MessageDecoder;
 import io.rsbot.net.codec.game.MessageEncoder;
@@ -182,7 +182,7 @@ public final class RsBotGroup implements Iterable<RsBot> {
     /**
      * Adds a new bot to this group.
      */
-    public RsBotLoginFuture login(String username, String password) throws IOException {
+    public LoginPromise login(String username, String password) throws IOException {
         if (!eventLoop.isAlive()) {
             eventLoop.start();
         }
@@ -192,7 +192,7 @@ public final class RsBotGroup implements Iterable<RsBot> {
             throw new IllegalStateException("Group already contains bot with username: " + username);
         }
         newBot.login();
-        return newBot.getLoginFuture();
+        return newBot.getLoginPromise();
     }
 
     /**

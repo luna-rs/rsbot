@@ -28,6 +28,11 @@ public final class NioEventLoop extends Thread {
     private static final Logger LOGGER = Logger.getGlobal();
 
     /**
+     * A list of decoded messages.
+     */
+    private final MessageList msgList = new MessageList();
+
+    /**
      * The group of bots.
      */
     private final RsBotGroup group;
@@ -89,10 +94,15 @@ public final class NioEventLoop extends Thread {
      * Handles the {@code OP_CONNECT} event.
      */
     private void handleConnect(SelectionKey key) throws IOException {
+        RsBotChannel rsChannel = (RsBotChannel) key.attachment();
+
         SocketChannel channel = (SocketChannel) key.channel();
-        LoginEncoder loginEncoder = group.getLoginEncoder();
         if (channel.finishConnect()) {
-            loginEncoder.encode((RsBotChannel) key.attachment());
+
+            LoginEncoder loginEncoder = group.getLoginEncoder();
+            loginEncoder.encode(rsChannel);
+
+            rsChannel.getLoginPromise().apply();
             key.interestOps(SelectionKey.OP_READ);
         }
     }
@@ -102,7 +112,14 @@ public final class NioEventLoop extends Thread {
      */
     private void handleRead(SelectionKey key) throws IOException {
         MessageDecoder msgDecoder = group.getMessageDecoder();
-        msgDecoder.decode((RsBotChannel) key.attachment());
+        msgDecoder.decode((RsBotChannel) key.attachment(), msgList);
+
+        Iterator<Object> it = msgList.mutableIterator();
+        while(it.hasNext()) {
+            Object msg = it.next();
+            msgDecoder.handleMessage(msg);
+            it.remove();
+        }
     }
 
     /**
@@ -111,14 +128,15 @@ public final class NioEventLoop extends Thread {
     private void handleWrite(SelectionKey key) throws IOException {
         RsBotChannel channel = (RsBotChannel) key.attachment();
         Queue<RsBotMessage> encodeQueue = channel.getEncodeQueue();
-        for(;;) {
+        for (; ; ) {
             RsBotMessage msg = encodeQueue.poll();
-            if(msg == null) {
+            if (msg == null) {
                 break;
             }
             MessageEncoder msgEncoder = group.getMessageEncoder();
             msgEncoder.encode(channel.getBot(), msg);
         }
+        key.interestOps(SelectionKey.OP_READ);
     }
 
     /**

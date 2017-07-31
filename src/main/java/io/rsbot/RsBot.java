@@ -1,7 +1,7 @@
 package io.rsbot;
 
 import io.rsbot.net.RsBotChannel;
-import io.rsbot.net.RsBotLoginFuture;
+import io.rsbot.net.LoginPromise;
 import io.rsbot.util.StringUtils;
 
 import java.io.IOException;
@@ -44,7 +44,7 @@ public final class RsBot {
     /**
      * The login future.
      */
-    private final RsBotLoginFuture loginFuture = new RsBotLoginFuture(this);
+    private final LoginPromise loginPromise = new LoginPromise(this);
 
     /**
      * Creates a new {@link RsBot}.
@@ -58,7 +58,7 @@ public final class RsBot {
         this.username = requireNonNull(username);
         this.password = requireNonNull(password);
         usernameHash = StringUtils.encodeBase37(username);
-        channel = new RsBotChannel(this, group.getSelector());
+        channel = new RsBotChannel(this, loginPromise, group.getSelector());
     }
 
     @Override
@@ -149,7 +149,7 @@ public final class RsBot {
     /**
      * @return The login future.
      */
-    RsBotLoginFuture getLoginFuture() {
-        return loginFuture;
+    LoginPromise getLoginPromise() {
+        return loginPromise;
     }
 }
