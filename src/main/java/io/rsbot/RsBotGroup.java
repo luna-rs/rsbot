@@ -1,7 +1,7 @@
 package io.rsbot;
 
 import io.rsbot.net.NioEventLoop;
-import io.rsbot.net.RsBotChannel;
+import io.rsbot.net.NioClient;
 import io.rsbot.net.LoginPromise;
 import io.rsbot.net.codec.RsaKeyPair;
 import io.rsbot.net.codec.game.MessageDecoder;
@@ -201,7 +201,7 @@ public final class RsBotGroup implements Iterable<RsBot> {
     public RsBot logout(String username) throws IOException {
         RsBot removedBot = Optional.ofNullable(bots.remove(username)).
                 orElseThrow(IllegalStateException::new);
-        removedBot.getChannel().close();
+        removedBot.getClient().close();
         return removedBot;
     }
 
@@ -211,9 +211,9 @@ public final class RsBotGroup implements Iterable<RsBot> {
     public void logoutAll() throws IOException {
         Iterator<RsBot> iterator = bots.values().iterator();
         while (iterator.hasNext()) {
-            RsBotChannel channel = iterator.next().getChannel();
+            NioClient client = iterator.next().getClient();
             iterator.remove();
-            channel.close();
+            client.close();
         }
     }
 

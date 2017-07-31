@@ -5,7 +5,7 @@ package io.rsbot.net;
  *
  * @author lare96 <http://github.org/lare96>
  */
-public enum RsBotState {
+public enum NioClientState {
 
     /**
      * The socket channel has been registered with the selector.

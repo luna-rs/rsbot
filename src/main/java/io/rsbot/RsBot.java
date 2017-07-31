@@ -1,6 +1,6 @@
 package io.rsbot;
 
-import io.rsbot.net.RsBotChannel;
+import io.rsbot.net.NioClient;
 import io.rsbot.net.LoginPromise;
 import io.rsbot.util.StringUtils;
 
@@ -37,9 +37,9 @@ public final class RsBot {
     private final long usernameHash;
 
     /**
-     * The input/output channel.
+     * The input/output client.
      */
-    private final RsBotChannel channel;
+    private final NioClient client;
 
     /**
      * The login future.
@@ -58,7 +58,7 @@ public final class RsBot {
         this.username = requireNonNull(username);
         this.password = requireNonNull(password);
         usernameHash = StringUtils.encodeBase37(username);
-        channel = new RsBotChannel(this, loginPromise, group.getSelector());
+        client = new NioClient(this, loginPromise, group.getSelector());
     }
 
     @Override
@@ -87,7 +87,7 @@ public final class RsBot {
      * Connects this bot to a server.
      */
     protected void login() throws IOException {
-        channel.connect();
+        client.connect();
     }
 
     /**
@@ -98,17 +98,17 @@ public final class RsBot {
     }
 
     /**
-     * Writes {@code msg} to the underlying channel.
+     * Writes {@code msg} to the underlying client.
      */
     public void write(Object msg) {
-        channel.write(msg);
+        client.write(msg);
     }
 
     /**
      * Returns {@code true} if this bot is logged in.
      */
     public boolean isLoggedIn() {
-        return channel.isActive();
+        return client.isActive();
     }
 
     /**
@@ -140,10 +140,10 @@ public final class RsBot {
     }
 
     /**
-     * @return The input/output channel.
+     * @return The input/output client.
      */
-    RsBotChannel getChannel() {
-        return channel;
+    NioClient getClient() {
+        return client;
     }
 
     /**

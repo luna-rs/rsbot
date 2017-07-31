@@ -16,14 +16,16 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.rsbot.net.RsBotState.*;
+import static io.rsbot.net.NioClientState.REGISTERED;
+import static io.rsbot.net.NioClientState.LOGGED_IN;
+import static io.rsbot.net.NioClientState.LOGGED_OUT;
 
 /**
  * A model representing an asynchronous input/output channel.
  *
  * @author lare96 <http://github.org/lare96>
  */
-public final class RsBotChannel {
+public final class NioClient {
 
     /**
      * A queue of pending messages.
@@ -53,7 +55,7 @@ public final class RsBotChannel {
     /**
      * The current connection state.
      */
-    private final AtomicReference<RsBotState> state = new AtomicReference<>(REGISTERED);
+    private final AtomicReference<NioClientState> state = new AtomicReference<>(REGISTERED);
 
     /**
      * The ISAAC encryption and decryption pairs.
@@ -66,13 +68,13 @@ public final class RsBotChannel {
     private Optional<SelectionKey> key = Optional.empty();
 
     /**
-     * Creates a new {@link RsBotChannel}.
+     * Creates a new {@link NioClient}.
      *
      * @param bot The bot instance.
      * @param loginPromise The login future.
      * @param selector The event selector.
      */
-    public RsBotChannel(RsBot bot, LoginPromise loginPromise, Selector selector) throws IOException {
+    public NioClient(RsBot bot, LoginPromise loginPromise, Selector selector) throws IOException {
         this.bot = bot;
         this.loginPromise = loginPromise;
         this.selector = selector;
@@ -155,14 +157,14 @@ public final class RsBotChannel {
     /**
      * Sets the networking state.
      */
-    public void setState(RsBotState newState){
+    public void setState(NioClientState newState) {
         state.set(newState);
     }
 
     /**
      * Returns the networking state.
      */
-    public RsBotState getState() {
+    public NioClientState getState() {
         return state.get();
     }
 

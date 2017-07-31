@@ -97,15 +97,15 @@ public final class NioEventLoop extends Thread {
      * Handles the {@code OP_CONNECT} event.
      */
     private void handleConnect(SelectionKey key) throws IOException {
-        RsBotChannel rsChannel = (RsBotChannel) key.attachment();
+        NioClient client = (NioClient) key.attachment();
 
         SocketChannel channel = (SocketChannel) key.channel();
         if (channel.finishConnect()) {
-            rsChannel.setState(RsBotState.LOGGING_IN);
+            client.setState(NioClientState.LOGGING_IN);
             LoginEncoder loginEncoder = group.getLoginEncoder();
-            loginEncoder.encode(rsChannel);
+            loginEncoder.encode(client);
 
-            rsChannel.getLoginPromise().apply();
+            client.getLoginPromise().apply();
             key.interestOps(SelectionKey.OP_READ);
         }
     }
@@ -115,7 +115,7 @@ public final class NioEventLoop extends Thread {
      */
     private void handleRead(SelectionKey key) throws IOException {
         MessageDecoder msgDecoder = group.getMessageDecoder();
-        msgDecoder.decode((RsBotChannel) key.attachment(), msgList);
+        msgDecoder.decode((NioClient) key.attachment(), msgList);
 
         Iterator<Object> it = msgList.mutableIterator();
         while (it.hasNext()) {
@@ -129,15 +129,15 @@ public final class NioEventLoop extends Thread {
      * Handles the {@code OP_WRITE} event.
      */
     private void handleWrite(SelectionKey key) throws IOException {
-        RsBotChannel channel = (RsBotChannel) key.attachment();
-        Queue<RsBotMessage> encodeQueue = channel.getEncodeQueue();
+        NioClient client = (NioClient) key.attachment();
+        Queue<RsBotMessage> encodeQueue = client.getEncodeQueue();
         for (; ; ) {
             RsBotMessage msg = encodeQueue.poll();
             if (msg == null) {
                 break;
             }
             MessageEncoder msgEncoder = group.getMessageEncoder();
-            msgEncoder.encode(channel.getBot(), msg);
+            msgEncoder.encode(client.getBot(), msg);
         }
         key.interestOps(SelectionKey.OP_READ);
     }
