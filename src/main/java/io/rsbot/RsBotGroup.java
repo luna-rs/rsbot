@@ -1,7 +1,8 @@
 package io.rsbot;
 
-import io.rsbot.net.RsBotEventLoop;
+import io.rsbot.net.NioEventLoop;
 import io.rsbot.net.RsBotChannel;
+import io.rsbot.net.RsBotLoginFuture;
 import io.rsbot.net.codec.RsaKeyPair;
 import io.rsbot.net.codec.game.MessageDecoder;
 import io.rsbot.net.codec.game.MessageEncoder;
@@ -10,7 +11,9 @@ import io.rsbot.net.codec.game.Rs317MessageEncoder;
 import io.rsbot.net.codec.login.LoginEncoder;
 import io.rsbot.net.codec.login.Rs317LoginEncoder;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.channels.Selector;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -23,7 +26,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import static java.util.Objects.requireNonNull;
 
 /**
- * A model representing a group of bots.
+ * A model representing a group of bots. Groups are light-weight and single-threaded bot
+ * 'managers', providing the ability to login/logout bots and handle networking events for them.
  *
  * @author lare96 <http://github.com/lare96>
  */
@@ -115,7 +119,7 @@ public final class RsBotGroup implements Iterable<RsBot> {
     /**
      * An event loop handling networking.
      */
-    private final RsBotEventLoop eventLoop = new RsBotEventLoop(this);
+    private final NioEventLoop eventLoop = new NioEventLoop(this);
 
     /**
      * The connection address.
@@ -178,8 +182,8 @@ public final class RsBotGroup implements Iterable<RsBot> {
     /**
      * Adds a new bot to this group.
      */
-    public RsBot add(String username, String password) {
-        if (!eventLoop.isAlive()) { /* Only start the reactor when needed! */
+    public RsBotLoginFuture login(String username, String password) throws IOException {
+        if (!eventLoop.isAlive()) {
             eventLoop.start();
         }
 
@@ -187,13 +191,14 @@ public final class RsBotGroup implements Iterable<RsBot> {
         if (bots.putIfAbsent(username, newBot) != null) {
             throw new IllegalStateException("Group already contains bot with username: " + username);
         }
-        return newBot;
+        newBot.login();
+        return newBot.getLoginFuture();
     }
 
     /**
      * Removes an existing bot from this group.
      */
-    public RsBot remove(String username) {
+    public RsBot logout(String username) throws IOException {
         RsBot removedBot = Optional.ofNullable(bots.remove(username)).
                 orElseThrow(IllegalStateException::new);
         removedBot.getChannel().close();
@@ -203,12 +208,12 @@ public final class RsBotGroup implements Iterable<RsBot> {
     /**
      * Removes all bots from this group.
      */
-    public void removeAll() {
+    public void logoutAll() throws IOException {
         Iterator<RsBot> iterator = bots.values().iterator();
         while (iterator.hasNext()) {
             RsBotChannel channel = iterator.next().getChannel();
-            channel.close();
             iterator.remove();
+            channel.close();
         }
     }
 
@@ -222,8 +227,14 @@ public final class RsBotGroup implements Iterable<RsBot> {
     /**
      * Retrieves an instance of a bot from this group.
      */
-    public Optional<RsBot> get(String username) {
-        return Optional.ofNullable(bots.get(username));
+    public RsBot get(String username) {
+        // TODO unit test for this, make sure 'remove' functionality exists
+        RsBot bot = bots.get(username);
+        if (bot != null && !bot.isLoggedIn()) {
+            bots.remove(username);
+            return null;
+        }
+        return bot;
     }
 
     /**
@@ -259,5 +270,12 @@ public final class RsBotGroup implements Iterable<RsBot> {
      */
     public Optional<RsaKeyPair> getKeyPair() {
         return keyPair;
+    }
+
+    /**
+     * @return The event loop's selector.
+     */
+    Selector getSelector() throws IOException {
+        return eventLoop.getSelector();
     }
 }
