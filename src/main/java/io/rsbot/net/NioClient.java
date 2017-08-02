@@ -2,6 +2,7 @@ package io.rsbot.net;
 
 import io.rsbot.RsBot;
 import io.rsbot.RsBotGroup;
+import io.rsbot.net.codec.Isaac;
 import io.rsbot.net.codec.IsaacPair;
 import io.rsbot.net.msg.RsBotMessage;
 
@@ -23,7 +24,7 @@ import static io.rsbot.net.NioClientState.LOGGED_OUT;
 /**
  * A model representing an asynchronous input/output channel.
  *
- * @author lare96 <http://github.org/lare96>
+ * @author lare96 <http://github.com/lare96>
  */
 public final class NioClient {
 
@@ -31,6 +32,11 @@ public final class NioClient {
      * A queue of pending messages.
      */
     private final Queue<RsBotMessage> encodeQueue = new ConcurrentLinkedQueue<>();
+
+    /**
+     * A buffer to read messages.
+     */
+    private final ByteBuffer readBuffer = ByteBuffer.allocate(128);
 
     /**
      * The bot instance.
@@ -58,7 +64,7 @@ public final class NioClient {
     private final AtomicReference<NioClientState> state = new AtomicReference<>(REGISTERED);
 
     /**
-     * The ISAAC encryption and decryption pairs.
+     * The ISAAC encryption and decryption pair.
      */
     private Optional<IsaacPair> isaacPair = Optional.empty();
 
@@ -148,6 +154,13 @@ public final class NioClient {
     }
 
     /**
+     * Returns {@code true} if this client has an ISAAC pair.
+     */
+    public boolean hasIsaac() {
+        return isaacPair.isPresent();
+    }
+
+    /**
      * Returns {@code true} if this channel is open.
      */
     public boolean isActive() {
@@ -157,7 +170,7 @@ public final class NioClient {
     /**
      * Sets the networking state.
      */
-    public void setState(NioClientState newState) {
+    void setState(NioClientState newState) {
         state.set(newState);
     }
 
@@ -187,5 +200,33 @@ public final class NioClient {
      */
     LoginPromise getLoginPromise() {
         return loginPromise;
+    }
+
+    /**
+     * @return A buffer to read messages.
+     */
+    public ByteBuffer getReadBuffer() {
+        return readBuffer;
+    }
+
+    /**
+     * @return The ISAAC encryptor.
+     */
+    public Isaac getEncryptor() {
+        return isaacPair.get().getEncryptor();
+    }
+
+    /**
+     * @return The ISAAC decryptor.
+     */
+    public Isaac getDecryptor() {
+        return isaacPair.get().getDecryptor();
+    }
+
+    /**
+     * Sets the ISAAC encryption and decryption pair.
+     */
+    public void setIsaacPair(Optional<IsaacPair> isaacPair) {
+        this.isaacPair = isaacPair;
     }
 }

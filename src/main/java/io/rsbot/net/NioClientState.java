@@ -3,7 +3,7 @@ package io.rsbot.net;
 /**
  * An enumerated type representing networking states.
  *
- * @author lare96 <http://github.org/lare96>
+ * @author lare96 <http://github.com/lare96>
  */
 public enum NioClientState {
 

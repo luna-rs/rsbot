@@ -1,11 +1,11 @@
-package org.jbot.net.codec;
+package io.rsbot.net.codec;
 
 /**
- * The enumerated type whose elements represent the possible custom RuneScape value types.
+ * An enumerated type describing RuneScape value types.
  *
- * @author lare96 <http://github.org/lare96>
+ * @author lare96 <http://github.com/lare96>
  */
-public enum JBotByteType {
+public enum NioByteType {
 
     /**
      * Do nothing to the value.

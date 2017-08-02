@@ -115,7 +115,7 @@ public final class NioEventLoop extends Thread {
      */
     private void handleRead(SelectionKey key) throws IOException {
         MessageDecoder msgDecoder = group.getMessageDecoder();
-        msgDecoder.decode((NioClient) key.attachment(), msgList);
+        msgDecoder.decode((NioClient) key.attachment(), (SocketChannel) key.channel(), msgList);
 
         Iterator<Object> it = msgList.mutableIterator();
         while (it.hasNext()) {
@@ -137,7 +137,7 @@ public final class NioEventLoop extends Thread {
                 break;
             }
             MessageEncoder msgEncoder = group.getMessageEncoder();
-            msgEncoder.encode(client.getBot(), msg);
+            client.write(msgEncoder.encode(client, msg));
         }
         key.interestOps(SelectionKey.OP_READ);
     }

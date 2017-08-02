@@ -1,11 +1,11 @@
-package org.jbot.net.codec;
+package io.rsbot.net.codec;
 
 /**
- * An enumerated type whose elements represent the possible endianness of Runescape game messages.
+ * An enumerated type describing byte endianness.
  *
- * @author lare96 <http://github.org/lare96>
+ * @author lare96 <http://github.com/lare96>
  */
-public enum JBotEndianness {
+public enum NioByteOrder {
 
     /**
      * Least significant byte is stored first and the most significant byte is stored last.

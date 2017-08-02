@@ -9,7 +9,7 @@ import java.util.Spliterator;
 /**
  * A linked list used for storing decoded networking Objects.
  *
- * @author lare96 <http://github.org/lare96>
+ * @author lare96 <http://github.com/lare96>
  */
 public final class MessageList implements Iterable<Object> {
 
