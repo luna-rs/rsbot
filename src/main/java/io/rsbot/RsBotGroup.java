@@ -1,8 +1,8 @@
 package io.rsbot;
 
-import io.rsbot.net.NioEventLoop;
+import io.rsbot.net.LoginFuture;
 import io.rsbot.net.NioClient;
-import io.rsbot.net.LoginPromise;
+import io.rsbot.net.NioEventLoop;
 import io.rsbot.net.codec.RsaKeyPair;
 import io.rsbot.net.codec.game.MessageDecoder;
 import io.rsbot.net.codec.game.MessageEncoder;
@@ -74,24 +74,24 @@ public final class RsBotGroup implements Iterable<RsBot> {
         /**
          * Sets the message encoder.
          */
-        public RsBotGroupBuilder messageEncoder(MessageEncoder encoder) {
-            this.messageEncoder = requireNonNull(encoder);
+        public RsBotGroupBuilder messageEncoder(MessageEncoder messageEncoder) {
+            this.messageEncoder = requireNonNull(messageEncoder);
             return this;
         }
 
         /**
          * Sets the message decoder.
          */
-        public RsBotGroupBuilder messageDecoder(MessageDecoder decoder) {
-            this.messageDecoder = requireNonNull(decoder);
+        public RsBotGroupBuilder messageDecoder(MessageDecoder messageDecoder) {
+            this.messageDecoder = requireNonNull(messageDecoder);
             return this;
         }
 
         /**
          * Sets the login encoder.
          */
-        public RsBotGroupBuilder loginEncoder(LoginEncoder encoder) {
-            this.loginEncoder = requireNonNull(encoder);
+        public RsBotGroupBuilder loginEncoder(LoginEncoder loginEncoder) {
+            this.loginEncoder = requireNonNull(loginEncoder);
             return this;
         }
 
@@ -182,7 +182,7 @@ public final class RsBotGroup implements Iterable<RsBot> {
     /**
      * Adds a new bot to this group.
      */
-    public LoginPromise login(String username, String password) throws IOException {
+    public LoginFuture login(String username, String password) throws IOException {
         if (!eventLoop.isAlive()) {
             eventLoop.start();
         }
@@ -192,7 +192,7 @@ public final class RsBotGroup implements Iterable<RsBot> {
             throw new IllegalStateException("Group already contains bot with username: " + username);
         }
         newBot.login();
-        return newBot.getLoginPromise();
+        return newBot.getLoginFuture();
     }
 
     /**
@@ -200,7 +200,7 @@ public final class RsBotGroup implements Iterable<RsBot> {
      */
     public RsBot logout(String username) throws IOException {
         RsBot removedBot = Optional.ofNullable(bots.remove(username)).
-                orElseThrow(IllegalStateException::new);
+                orElseThrow(IllegalArgumentException::new);
         removedBot.getClient().close();
         return removedBot;
     }
@@ -228,7 +228,6 @@ public final class RsBotGroup implements Iterable<RsBot> {
      * Retrieves an instance of a bot from this group.
      */
     public RsBot get(String username) {
-        // TODO unit test for this, make sure 'remove' functionality exists
         RsBot bot = bots.get(username);
         if (bot != null && !bot.isLoggedIn()) {
             bots.remove(username);
@@ -243,6 +242,13 @@ public final class RsBotGroup implements Iterable<RsBot> {
     public void terminate() throws IOException {
         eventLoop.interrupt();
         eventLoop.getSelector().close();
+    }
+
+    /**
+     * Adds a bot straight to the backing map. Only used for unit testing.
+     */
+    void add(RsBot bot) {
+        bots.put(bot.getUsername(), bot);
     }
 
     /**

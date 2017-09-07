@@ -1,7 +1,8 @@
 package io.rsbot;
 
+import io.rsbot.net.LoginFuture;
 import io.rsbot.net.NioClient;
-import io.rsbot.net.LoginPromise;
+import io.rsbot.net.NioClientState;
 import io.rsbot.util.StringUtils;
 
 import java.io.IOException;
@@ -42,9 +43,9 @@ public final class RsBot {
     private final NioClient client;
 
     /**
-     * The login future.
+     * The login notifier.
      */
-    private final LoginPromise loginPromise = new LoginPromise(this);
+    private final LoginFuture loginFuture = new LoginFuture(this);
 
     /**
      * Creates a new {@link RsBot}.
@@ -58,7 +59,7 @@ public final class RsBot {
         this.username = requireNonNull(username);
         this.password = requireNonNull(password);
         usernameHash = StringUtils.encodeBase37(username);
-        client = new NioClient(this, loginPromise, group.getSelector());
+        client = new NioClient(this, loginFuture, group.getSelector());
     }
 
     @Override
@@ -108,7 +109,7 @@ public final class RsBot {
      * Returns {@code true} if this bot is logged in.
      */
     public boolean isLoggedIn() {
-        return client.isActive();
+        return client.getState() == NioClientState.LOGGED_IN;
     }
 
     /**
@@ -149,7 +150,10 @@ public final class RsBot {
     /**
      * @return The login future.
      */
-    LoginPromise getLoginPromise() {
-        return loginPromise;
+    LoginFuture getLoginFuture() {
+        if(loginFuture.isDone()) {
+            throw new IllegalStateException("Login has already been completed");
+        }
+        return loginFuture;
     }
 }
